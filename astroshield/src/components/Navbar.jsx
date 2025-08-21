@@ -16,11 +16,15 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="w-full fixed top-0 left-0 z-50 bg-[#050014]/80 backdrop-blur-lg border-b border-cyan-400/20">
+    <header className="w-full fixed top-0 left-0 z-50 bg-[#141414]/95 backdrop-blur-lg border-b border-cyan-400/20">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-r from-cyan-400 to-purple-600 shadow-lg shadow-cyan-500/40"></div>
+          <img
+            src="/logo.png"
+            alt="OrbitXOS Logo"
+            className="w-8 h-8 object-cover rounded-full drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]"
+          />
           <h1 className="text-lg font-semibold text-cyan-300 tracking-wide drop-shadow-[0_0_12px_rgba(34,211,238,0.6)]">
             OrbitXOS
           </h1>
@@ -58,7 +62,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden flex flex-col gap-3 bg-[#050014]/95 px-6 py-5 border-t border-cyan-400/20">
+        <div className="md:hidden flex flex-col gap-3 bg-[#0d0d0d]/98 px-6 py-5 border-t border-cyan-400/20">
           {links.map((link) => (
             <NavLink
               key={link.name}
