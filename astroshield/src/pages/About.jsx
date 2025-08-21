@@ -1,0 +1,165 @@
+import React from "react";
+import { motion } from "framer-motion";
+import Navbar from "../components/Navbar";
+
+const About = () => {
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Navbar */}
+      <Navbar />
+
+      <div className="p-8">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="max-w-5xl mx-auto text-center py-16 px-6 bg-black/70 backdrop-blur-lg rounded-3xl shadow-[0_0_25px_rgba(0,255,255,0.3)]"
+        >
+          <h1 className="text-4xl md:text-5xl font-extrabold text-cyan-400 mb-6">
+            About AstroShield
+          </h1>
+          <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
+            Pioneering the future of space safety through advanced artificial intelligence and real-time orbital monitoring. Our mission is to protect humanity's space assets and ensure sustainable access to orbit for generations to come.
+          </p>
+        </motion.div>
+
+        {/* Mission Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="max-w-6xl mx-auto mt-12 bg-black/60 backdrop-blur-lg border border-cyan-500/30 rounded-2xl p-8 shadow-[0_0_20px_rgba(0,255,255,0.4)]"
+        >
+          <h2 className="text-3xl font-bold text-cyan-400 mb-4">Our Mission</h2>
+          <p className="text-gray-300 leading-relaxed">
+            As space becomes increasingly congested with over{" "}
+            <span className="text-cyan-300 font-semibold">34,000 trackable objects</span> in orbit, the risk of catastrophic collisions threatens the future of space exploration and critical satellite infrastructure.
+          </p>
+          <p className="text-gray-300 leading-relaxed mt-4">
+            <span className="text-cyan-300 font-semibold">AstroShield</span> leverages cutting-edge machine learning algorithms to predict collision trajectories up to 7 days in advance, providing automated trajectory correction suggestions that have prevented{" "}
+            <span className="text-cyan-300 font-semibold">847 potential collisions</span> to date.
+          </p>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center mt-8">
+            {[
+              { value: "34,128", label: "Objects Tracked", color: "text-cyan-300" },
+              { value: "97.3%", label: "Prediction Accuracy", color: "text-green-400" },
+              { value: "847", label: "Collisions Prevented", color: "text-yellow-400" },
+              { value: "24/7", label: "Continuous Monitoring", color: "text-pink-400" },
+            ].map((stat, idx) => (
+              <div
+                key={idx}
+                className="bg-black/60 p-6 rounded-xl shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:scale-105 hover:shadow-[0_0_25px_rgba(0,255,255,0.6)] transition"
+              >
+                <h3 className={`text-2xl font-bold ${stat.color}`}>{stat.value}</h3>
+                <p className="text-gray-400">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* AI Pipeline Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="max-w-6xl mx-auto mt-16"
+        >
+          <h2 className="text-3xl font-bold text-center text-cyan-400 mb-10">
+            AI Technology Pipeline
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              {
+                title: "Data Ingestion",
+                desc: "Real-time TLE data from global tracking networks and radar systems",
+                color: "text-cyan-400",
+                border: "border-cyan-400/30",
+              },
+              {
+                title: "ML Processing",
+                desc: "Neural networks trained on 847 historical conjunction events",
+                color: "text-pink-400",
+                border: "border-pink-400/30",
+              },
+              {
+                title: "Risk Scoring",
+                desc: "Dynamic probability assessment with 97.3% accuracy",
+                color: "text-blue-400",
+                border: "border-blue-400/30",
+              },
+              {
+                title: "Automated Response",
+                desc: "Optimal maneuver calculations and collision avoidance strategies",
+                color: "text-yellow-400",
+                border: "border-yellow-400/30",
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className={`bg-black/60 border ${item.border} p-6 rounded-2xl shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,0,0.4)] transition`}
+              >
+                <h3 className={`text-xl font-bold ${item.color} mb-3`}>{item.title}</h3>
+                <p className="text-gray-400">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Team Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="max-w-6xl mx-auto mt-16 text-center"
+        >
+          <h2 className="text-3xl font-bold text-cyan-400 mb-10">Meet Our Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              {
+                name: "Dr. Sarah Chen",
+                role: "Lead AI Engineer",
+                skills: "Machine Learning, Orbital Mechanics",
+                initials: "SC",
+              },
+              {
+                name: "Marcus Rodriguez",
+                role: "Space Systems Engineer",
+                skills: "Satellite Ops, Trajectory Analysis",
+                initials: "MR",
+              },
+              {
+                name: "Elena Kozlov",
+                role: "Data Scientist",
+                skills: "Predictive Analytics, Risk Assessment",
+                initials: "EK",
+              },
+              {
+                name: "James Park",
+                role: "Full-Stack Developer",
+                skills: "Real-time Systems, UI/UX",
+                initials: "JP",
+              },
+            ].map((member, idx) => (
+              <div
+                key={idx}
+                className="bg-black/60 backdrop-blur-lg border border-cyan-500/30 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:scale-105 hover:shadow-[0_0_25px_rgba(0,255,255,0.6)] transition"
+              >
+                <div className="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 text-black text-xl font-bold mb-4">
+                  {member.initials}
+                </div>
+                <h3 className="text-lg font-bold text-cyan-300">{member.name}</h3>
+                <p className="text-gray-400">{member.role}</p>
+                <p className="text-gray-500 text-sm mt-2">{member.skills}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default About;
