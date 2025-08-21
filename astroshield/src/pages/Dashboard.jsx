@@ -2,7 +2,7 @@ import React from "react";
 import { RefreshCw, Filter, Eye, Satellite, AlertTriangle, Activity, Globe } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-/* --- Reusable Components --- */
+
 function StatCard({ value, label, change, color, Icon }) {
   return (
     <div className="p-6 rounded-xl shadow-lg text-center 
