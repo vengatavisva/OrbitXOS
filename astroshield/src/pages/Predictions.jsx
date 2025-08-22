@@ -1,19 +1,21 @@
 // src/pages/PredictionPage.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import StarfieldBackground from "../components/StarfieldBackground";
 
 const Prediction = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSatellite, setSelectedSatellite] = useState(null); // NEW
+  const [selectedSatellite, setSelectedSatellite] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch("https://orbitxos.onrender.com/predict");
         const data = await res.json();
-
         if (data.critical_events) {
           setEvents(data.critical_events);
         }
@@ -23,7 +25,6 @@ const Prediction = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -65,7 +66,7 @@ const Prediction = () => {
                 </span>
               </p>
               <button
-                onClick={() => setSelectedSatellite(events[0].satellite)} // NEW
+                onClick={() => setSelectedSatellite(events[0].satellite)}
                 className={`${buttonStyles["Critical"]} transition px-6 py-2.5 rounded-xl font-semibold shadow-md`}
               >
                 View Details
@@ -103,6 +104,10 @@ const Prediction = () => {
                   } else {
                     burnText = maneuverText;
                   }
+
+                  // Fallback TLE if missing
+                  const satelliteTLE = event.satellite_tle || "No TLE data available";
+                  const debrisTLE = event.debris_tle || "No TLE data available";
 
                   return (
                     <PredictionCard
@@ -144,48 +149,43 @@ const Prediction = () => {
                       confidence={event.confidence}
                       buttonColor={event.risk_level}
                       buttonStyles={buttonStyles}
-                      isHighlighted={selectedSatellite === event.satellite} // NEW
+                      isHighlighted={selectedSatellite === event.satellite}
+                      onExecute={() =>
+                        navigate("/aipredictor", {
+                          state: {
+                            satellite: event.satellite,
+                            satelliteTLE,
+                            debris: event.debris,
+                            debrisTLE,
+                            risk: event.risk_level,
+                            time: event.time_to_impact,
+                          },
+                        })
+                      }
                     />
                   );
                 })}
               </div>
             )}
           </section>
-                    {/* Upcoming Events Timeline */}
-                    <section className="bg-[#0d0d2a]/80 border border-cyan-500/20 rounded-2xl p-6 shadow-lg backdrop-blur-md">
+
+          {/* Upcoming Events Timeline */}
+          <section className="bg-[#0d0d2a]/80 border border-cyan-500/20 rounded-2xl p-6 shadow-lg backdrop-blur-md">
             <h2 className="text-2xl font-bold text-cyan-400 mb-4">
               Upcoming Events Timeline
             </h2>
             <ul className="space-y-4">
               {[
-                {
-                  time: "14:23 UTC",
-                  event: "Conjunction Analysis Complete",
-                  tag: "analysis",
-                },
-                {
-                  time: "15:45 UTC",
-                  event: "Starlink-4052 Maneuver Window",
-                  tag: "maneuver",
-                },
-                {
-                  time: "18:30 UTC",
-                  event: "Debris Cloud Update",
-                  tag: "update",
-                },
-                {
-                  time: "22:15 UTC",
-                  event: "ISS Trajectory Assessment",
-                  tag: "assessment",
-                },
+                { time: "14:23 UTC", event: "Conjunction Analysis Complete", tag: "analysis" },
+                { time: "15:45 UTC", event: "Starlink-4052 Maneuver Window", tag: "maneuver" },
+                { time: "18:30 UTC", event: "Debris Cloud Update", tag: "update" },
+                { time: "22:15 UTC", event: "ISS Trajectory Assessment", tag: "assessment" },
               ].map((item, i) => (
                 <li
                   key={i}
                   className="flex justify-between items-center text-sm bg-[#0f0f2e]/80 rounded-lg px-4 py-3 border border-cyan-500/10"
                 >
-                  <span className="text-cyan-300 font-medium">
-                    {item.time}
-                  </span>
+                  <span className="text-cyan-300 font-medium">{item.time}</span>
                   <span className="text-gray-300">{item.event}</span>
                   <span className="text-cyan-400 italic">{item.tag}</span>
                 </li>
@@ -213,7 +213,8 @@ const PredictionCard = ({
   confidence,
   buttonColor,
   buttonStyles,
-  isHighlighted, // NEW
+  isHighlighted,
+  onExecute,
 }) => {
   return (
     <div
@@ -226,9 +227,7 @@ const PredictionCard = ({
     >
       {/* Left: Satellite & Target */}
       <div className="min-w-[180px]">
-        <h3 className="text-base font-semibold text-cyan-300">
-          ✦ {title}
-        </h3>
+        <h3 className="text-base font-semibold text-cyan-300">✦ {title}</h3>
         <p className="text-sm text-gray-400">vs {target}</p>
       </div>
 
@@ -242,10 +241,7 @@ const PredictionCard = ({
       <div className="flex flex-col items-center min-w-[150px]">
         <span className={`text-2xl font-bold ${probColor}`}>{prob}</span>
         <div className="w-28 bg-gray-800 h-2 rounded-full mt-1 overflow-hidden">
-          <div
-            className={`h-2 rounded-full bg-gradient-to-r ${barColor}`}
-            style={{ width: prob }}
-          ></div>
+          <div className={`h-2 rounded-full bg-gradient-to-r ${barColor}`} style={{ width: prob }}></div>
         </div>
         <span className={`text-xs mt-1 ${riskColor}`}>{risk}</span>
       </div>
@@ -265,9 +261,8 @@ const PredictionCard = ({
       {/* Execute Button */}
       <div className="min-w-[100px] flex justify-end">
         <button
-          className={`${
-            buttonStyles[buttonColor] || "bg-cyan-500 hover:bg-cyan-600"
-          } px-5 py-2 rounded-lg font-semibold transition`}
+          onClick={onExecute}
+          className={`${buttonStyles[buttonColor] || "bg-cyan-500 hover:bg-cyan-600"} px-5 py-2 rounded-lg font-semibold transition`}
         >
           Execute
         </button>

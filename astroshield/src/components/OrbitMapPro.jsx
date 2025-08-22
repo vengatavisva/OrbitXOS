@@ -17,13 +17,21 @@ const TEXTURES = {
 
 export default function OrbitMapPro({
   height = 600,
-  debrisCount = 800,
+  debrisCount = 3000,
   showNightLights = true,
   lockScrollOnHover = true,
 }) {
   const mountRef = useRef(null);
   const cleanupRef = useRef(() => {});
   const [tleData, setTleData] = useState([]);
+
+  // filters
+  const [filter, setFilter] = useState("both"); // satellites | debris | both
+  const [selectedSat, setSelectedSat] = useState("");
+
+  // store references for later
+  const satsRef = useRef([]);
+  const focusOnSatelliteRef = useRef(() => {});
 
   /** Parse TLE */
   const parseTLE = (text) => {
@@ -35,11 +43,10 @@ export default function OrbitMapPro({
           name: lines[i],
           l1: lines[i + 1],
           l2: lines[i + 2],
-          color: new THREE.Color().setHSL(Math.random(), 1, 0.6),
         });
       }
     }
-    return sats.slice(-1000);
+    return sats.slice(-2000);
   };
 
   /** Load TLE */
@@ -63,8 +70,6 @@ export default function OrbitMapPro({
     if (!container) return;
 
     const scene = new THREE.Scene();
-
-    // ✅ Pure black background
     scene.background = new THREE.Color(0x000000);
 
     /** Camera */
@@ -109,9 +114,7 @@ export default function OrbitMapPro({
         map: texDiffuse,
         emissiveMap: texNight || null,
         emissiveIntensity: texNight ? 0.7 : 0,
-        emissive: texNight
-          ? new THREE.Color(0xffffff)
-          : new THREE.Color(0x000000),
+        emissive: texNight ? new THREE.Color(0xffffff) : new THREE.Color(0x000000),
         shininess: 10,
       })
     );
@@ -132,7 +135,7 @@ export default function OrbitMapPro({
     /** 🌟 Stars background */
     const starPositions = [];
     for (let i = 0; i < 5000; i++) {
-      const r = 200; // big sphere radius
+      const r = 200;
       const theta = Math.random() * 2 * Math.PI;
       const phi = Math.acos(2 * Math.random() - 1);
       starPositions.push(
@@ -146,16 +149,9 @@ export default function OrbitMapPro({
       "position",
       new THREE.Float32BufferAttribute(starPositions, 3)
     );
-    const starMat = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.5,
-      transparent: true,
-      opacity: 0.8,
-    });
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
+    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 0.8 })));
 
-    /** Random debris (particles) */
+    /** Random debris */
     const debrisPositions = [];
     for (let i = 0; i < debrisCount; i++) {
       const altKm = 400 + Math.random() * 1100;
@@ -170,39 +166,27 @@ export default function OrbitMapPro({
         rUnits * Math.cos(phi)
       );
     }
-
     const debrisGeo = new THREE.BufferGeometry();
-    debrisGeo.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(debrisPositions, 3)
+    debrisGeo.setAttribute("position", new THREE.Float32BufferAttribute(debrisPositions, 3));
+    const debrisPoints = new THREE.Points(
+      debrisGeo,
+      new THREE.PointsMaterial({ size: 0.018, opacity: 0.9, transparent: true, color: 0xffe9a3 })
     );
-
-    const debrisMat = new THREE.PointsMaterial({
-      size: 0.018,
-      opacity: 0.9,
-      transparent: true,
-      color: 0xffe9a3,
-    });
-
-    const debris = new THREE.Points(debrisGeo, debrisMat);
-    scene.add(debris);
+    scene.add(debrisPoints);
 
     /** Satellites */
     const sats = [];
     tleData.forEach((sat) => {
       const rec = satellite.twoline2satrec(sat.l1, sat.l2);
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.02, 12, 12),
-        new THREE.MeshStandardMaterial({
-          color: sat.color,
-          emissive: sat.color,
-          emissiveIntensity: 1.0,
-        })
+        new THREE.SphereGeometry(0.012, 12, 12),
+        new THREE.MeshStandardMaterial({ color: 0x009900, emissive: 0x00cc00, emissiveIntensity: 1.2 })
       );
-      mesh.userData = { name: sat.name, rec, color: sat.color };
+      mesh.userData = { name: sat.name, rec, color: 0x00cc00 };
       scene.add(mesh);
       sats.push(mesh);
     });
+    satsRef.current = sats;
 
     /** Tooltip */
     const raycaster = new THREE.Raycaster();
@@ -212,25 +196,23 @@ export default function OrbitMapPro({
     tip.style.padding = "6px 10px";
     tip.style.background = "rgba(30, 30, 30, 0.6)";
     tip.style.backdropFilter = "blur(6px)";
-    tip.style.border = "1px solid rgba(255,255,255,0.2)";
     tip.style.borderRadius = "8px";
     tip.style.color = "#fff";
     tip.style.fontSize = "13px";
-    tip.style.boxShadow = "0 0 8px rgba(0,200,255,0.6)";
     tip.style.pointerEvents = "none";
     tip.style.display = "none";
     container.style.position = "relative";
     container.appendChild(tip);
 
-    /** Orbit trail */
+    /** Orbit trail + focus */
     let activeTrail = null;
+    let trackedSat = null;
     const makeTrail = (rec, color) => {
       const positions = [];
-      const samples = 180;
+      const samples = 360;
       const period = (2 * Math.PI) / rec.no;
       const step = (period * 60) / samples;
       const epoch = new Date();
-
       for (let i = 0; i < samples; i++) {
         const t = new Date(epoch.getTime() + i * step * 1000);
         const pv = satellite.propagate(rec, t);
@@ -242,23 +224,48 @@ export default function OrbitMapPro({
           );
         }
       }
-
       const trailGeo = new THREE.BufferGeometry();
-      trailGeo.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(positions, 3)
-      );
-      return new THREE.Line(
-        trailGeo,
-        new THREE.LineBasicMaterial({
-          color,
-          transparent: true,
-          opacity: 0.6,
-        })
-      );
+      trailGeo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      return new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.95 }));
     };
 
-    /** Mouse move */
+    const focusOnSatellite = (sat) => {
+      if (!sat) return;
+      const { rec, color } = sat.userData;
+      if (activeTrail) scene.remove(activeTrail);
+      activeTrail = makeTrail(rec, color);
+      scene.add(activeTrail);
+      trackedSat = sat;
+
+      // smooth zoom
+      const targetPos = sat.position.clone().multiplyScalar(2);
+      let t = 0;
+      const startPos = camera.position.clone();
+      function zoomAnim() {
+        t += 0.02;
+        camera.position.lerpVectors(startPos, targetPos, t);
+        controls.target.lerp(sat.position, t);
+        controls.update();
+        if (t < 1) requestAnimationFrame(zoomAnim);
+      }
+      zoomAnim();
+    };
+    focusOnSatelliteRef.current = focusOnSatellite;
+
+    /** Click = orbit trail + zoom */
+    const onClick = (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hit = raycaster.intersectObjects(sats);
+      if (hit.length > 0) {
+        focusOnSatellite(hit[0].object);
+        setSelectedSat(hit[0].object.userData.name);
+      }
+    };
+
+    /** Tooltip */
     const onPointerMove = (e) => {
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -272,21 +279,6 @@ export default function OrbitMapPro({
         tip.style.display = "block";
       } else {
         tip.style.display = "none";
-      }
-    };
-
-    /** Click = orbit trail */
-    const onClick = (e) => {
-      const rect = renderer.domElement.getBoundingClientRect();
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      const hit = raycaster.intersectObjects(sats);
-      if (hit.length > 0) {
-        const sat = hit[0].object.userData;
-        if (activeTrail) scene.remove(activeTrail);
-        activeTrail = makeTrail(sat.rec, sat.color);
-        scene.add(activeTrail);
       }
     };
 
@@ -310,13 +302,6 @@ export default function OrbitMapPro({
       earth.rotation.y += 0.0005;
       atmosphere.rotation.y += 0.0005;
 
-      // 🌌 twinkle stars slowly
-      stars.rotation.y += 0.00005;
-
-      // 🛰 debris drift slowly
-      debris.rotation.y += 0.0002;
-      debris.rotation.x += 0.00005;
-
       const now = new Date();
       sats.forEach((mesh) => {
         const pv = satellite.propagate(mesh.userData.rec, now);
@@ -327,7 +312,24 @@ export default function OrbitMapPro({
             pv.position.z * KM_TO_UNITS
           );
         }
+
+        // filters
+        if (selectedSat && mesh.userData.name === selectedSat) {
+          mesh.visible = true;
+        } else if (filter === "satellites") {
+          mesh.visible = true;
+        } else if (filter === "debris") {
+          mesh.visible = false;
+        } else {
+          mesh.visible = true;
+        }
       });
+
+      debrisPoints.visible = filter === "debris" || filter === "both";
+
+      if (trackedSat) {
+        controls.target.lerp(trackedSat.position, 0.1);
+      }
 
       controls.update();
       renderer.render(scene, camera);
@@ -346,18 +348,104 @@ export default function OrbitMapPro({
     };
 
     return () => cleanupRef.current();
-  }, [tleData, debrisCount, showNightLights, lockScrollOnHover]);
+  }, [tleData, debrisCount, showNightLights, lockScrollOnHover, filter, selectedSat]);
+
+  /** Handle dropdown focus */
+  useEffect(() => {
+    if (selectedSat) {
+      const sat = satsRef.current.find((s) => s.userData.name === selectedSat);
+      if (sat) focusOnSatelliteRef.current(sat);
+    }
+  }, [selectedSat]);
 
   return (
-    <div
-      ref={mountRef}
-      style={{
-        width: "100%",
-        height,
-        borderRadius: "16px",
-        overflow: "hidden",
-        boxShadow: "0 0 30px rgba(0,0,0,0.6)",
-      }}
-    />
-  );
+    <div style={{ position: "relative" }}>
+      {/* ✨ Compact Floating UI */}
+      <div
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 12,
+          background: "rgba(25,25,35,0.8)",
+          padding: "10px 12px",
+          borderRadius: "12px",
+          color: "white",
+          zIndex: 10,
+          fontSize: "12px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(6px)",
+          minWidth: "180px",
+        }}
+      >
+        {/* View Mode Pills */}
+        <div style={{ display: "flex", gap: "6px", justifyContent: "space-between" }}>
+          {["both", "satellites", "debris"].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setFilter(mode)}
+              style={{
+                flex: 1,
+                padding: "6px 8px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                cursor: "pointer",
+                background: filter === mode ? "rgba(255,255,255,0.15)" : "transparent",
+                border: filter === mode
+                  ? "1px solid rgba(255,255,255,0.3)"
+                  : "1px solid rgba(255,255,255,0.1)",
+                color: "white",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {mode === "both" && "🛰+☄"}
+              {mode === "satellites" && "🛰"}
+              {mode === "debris" && "☄"}
+            </button>
+          ))}
+        </div>
+  
+        {/* Focus Satellite Dropdown */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <label style={{ fontSize: "11px", opacity: 0.75 }}>Focus:</label>
+          <select
+            value={selectedSat}
+            onChange={(e) => setSelectedSat(e.target.value)}
+            style={{
+              padding: "6px 8px",
+              borderRadius: "8px",
+              background: "rgba(255,255,255,0.05)",
+              color: "white",
+              border: "1px solid rgba(255,255,255,0.15)",
+              fontSize: "11px",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="">-- None --</option>
+            {tleData.slice(0, 60).map((sat, i) => (
+              <option key={i} value={sat.name}>
+                {sat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+  
+      {/* Canvas */}
+      <div
+        ref={mountRef}
+        style={{
+          width: "100%",
+          height,
+          borderRadius: "16px",
+          overflow: "hidden",
+          boxShadow: "0 0 30px rgba(0,0,0,0.6)",
+        }}
+      />
+    </div>
+  );  
 }
