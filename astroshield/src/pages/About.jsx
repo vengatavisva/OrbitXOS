@@ -21,13 +21,15 @@ const About = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
-            className="max-w-5xl mx-auto text-center py-16 px-6 bg-black/70 backdrop-blur-lg rounded-3xl shadow-[0_0_25px_rgba(0,255,255,0.3)]"
+            className="max-w-5xl mx-auto text-center py-16 px-6 mt-24 bg-black/70 backdrop-blur-lg rounded-3xl shadow-[0_0_25px_rgba(0,255,255,0.3)]"
           >
             <h1 className="text-4xl md:text-5xl font-extrabold text-cyan-400 mb-6">
               About AstroShield
             </h1>
             <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
-              Pioneering the future of space safety through advanced artificial intelligence and real-time orbital monitoring. Our mission is to protect humanity's space assets and ensure sustainable access to orbit for generations to come.
+              Pioneering the future of space safety through advanced artificial intelligence
+              and real-time orbital monitoring. Our mission is to protect humanity's space
+              assets and ensure sustainable access to orbit for generations to come.
             </p>
           </motion.div>
 
@@ -122,41 +124,48 @@ const About = () => {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="max-w-6xl mx-auto mt-16 text-center"
           >
-            <h2 className="text-3xl font-bold text-cyan-400 mb-10">Meet Our Team</h2>
+            <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent drop-shadow-lg mb-10">
+              Meet Our Team
+            </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {[
                 {
-                  name: "Dr. Sarah Chen",
-                  role: "Lead AI Engineer",
-                  skills: "Machine Learning, Orbital Mechanics",
-                  initials: "SC",
+                  name: "Sudharsan S",
+                  role: "Machine Learning Engineer",
+                  skills: "Predictive Modeling, TLE Data Analysis",
+                  image: "src/assets/sudh.JPG",
                 },
                 {
-                  name: "Marcus Rodriguez",
-                  role: "Space Systems Engineer",
-                  skills: "Satellite Ops, Trajectory Analysis",
-                  initials: "MR",
-                },
-                {
-                  name: "Elena Kozlov",
-                  role: "Data Scientist",
-                  skills: "Predictive Analytics, Risk Assessment",
-                  initials: "EK",
-                },
-                {
-                  name: "James Park",
+                  name: "Vengata Visva S",
                   role: "Full-Stack Developer",
-                  skills: "Real-time Systems, UI/UX",
-                  initials: "JP",
+                  skills: "API Development, Backend Integration",
+                  image: "src/assets/vis.JPG",
+                },
+                {
+                  name: "Rohith B",
+                  role: "Full-Stack Developer",
+                  skills: "RESTfull Services, System Architecture",
+                  image: "src/assets/roh.JPG",
+                },
+                {
+                  name: "Jayanth K",
+                  role: "Backend Developer",
+                  skills: "Server Side Programming, Optimization",
+                  image: "src/assets/jayan.jpg",
                 },
               ].map((member, idx) => (
                 <div
                   key={idx}
                   className="bg-black/60 backdrop-blur-lg border border-cyan-500/30 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:scale-105 hover:shadow-[0_0_25px_rgba(0,255,255,0.6)] transition"
                 >
-                  <div className="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 text-black text-xl font-bold mb-4">
-                    {member.initials}
-                  </div>
+                  {/* Profile Image */}
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-cyan-400 shadow-lg mb-4"
+                  />
+
                   <h3 className="text-lg font-bold text-cyan-300">{member.name}</h3>
                   <p className="text-gray-400">{member.role}</p>
                   <p className="text-gray-500 text-sm mt-2">{member.skills}</p>
@@ -164,6 +173,7 @@ const About = () => {
               ))}
             </div>
           </motion.div>
+
         </div>
       </div>
     </div>

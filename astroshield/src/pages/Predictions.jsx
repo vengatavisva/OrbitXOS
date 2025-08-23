@@ -36,7 +36,7 @@ const Prediction = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-black text-white font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-black text-white font-orbitron overflow-hidden">
       <StarfieldBackground />
 
       <div className="relative z-10">
@@ -45,14 +45,14 @@ const Prediction = () => {
         <div className="max-w-7xl mx-auto px-6 py-12 pt-28 space-y-10">
           {/* Title */}
           <div>
-            <h1 className="text-4xl font-bold text-cyan-400 drop-shadow-lg">
-              Collision Prediction Center
-            </h1>
-            <p className="text-gray-400 mt-2 text-lg">
-              AI-enhanced trajectory analysis and collision avoidance
-              recommendations
-            </p>
-          </div>
+          <h1 className="text-4xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent drop-shadow-lg">
+            Collision Prediction Center
+          </h1>
+          <p className="text-gray-400 mt-2 text-lg font-inter tracking-wide">
+            AI-enhanced trajectory analysis and collision avoidance recommendations
+          </p>
+        </div>
+
 
           {/* Critical Alert */}
           {events.length > 0 && events[0].risk_level === "Critical" && (
@@ -77,7 +77,7 @@ const Prediction = () => {
           {/* Active Predictions */}
           <section>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-cyan-400">
+              <h2 className="text-2xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent drop-shadow-lg">
                 Active Collision Predictions
               </h2>
               <span className="text-sm text-gray-400">
@@ -106,7 +106,8 @@ const Prediction = () => {
                   }
 
                   // Fallback TLE if missing
-                  const satelliteTLE = event.satellite_tle || "No TLE data available";
+                  const satelliteTLE =
+                    event.satellite_tle || "No TLE data available";
                   const debrisTLE = event.debris_tle || "No TLE data available";
 
                   return (
@@ -169,30 +170,7 @@ const Prediction = () => {
             )}
           </section>
 
-          {/* Upcoming Events Timeline */}
-          <section className="bg-[#0d0d2a]/80 border border-cyan-500/20 rounded-2xl p-6 shadow-lg backdrop-blur-md">
-            <h2 className="text-2xl font-bold text-cyan-400 mb-4">
-              Upcoming Events Timeline
-            </h2>
-            <ul className="space-y-4">
-              {[
-                { time: "14:23 UTC", event: "Conjunction Analysis Complete", tag: "analysis" },
-                { time: "15:45 UTC", event: "Starlink-4052 Maneuver Window", tag: "maneuver" },
-                { time: "18:30 UTC", event: "Debris Cloud Update", tag: "update" },
-                { time: "22:15 UTC", event: "ISS Trajectory Assessment", tag: "assessment" },
-              ].map((item, i) => (
-                <li
-                  key={i}
-                  className="flex justify-between items-center text-sm bg-[#0f0f2e]/80 rounded-lg px-4 py-3 border border-cyan-500/10"
-                >
-                  <span className="text-cyan-300 font-medium">{item.time}</span>
-                  <span className="text-gray-300">{item.event}</span>
-                  <span className="text-cyan-400 italic">{item.tag}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+         </div>
       </div>
     </div>
   );
@@ -241,7 +219,10 @@ const PredictionCard = ({
       <div className="flex flex-col items-center min-w-[150px]">
         <span className={`text-2xl font-bold ${probColor}`}>{prob}</span>
         <div className="w-28 bg-gray-800 h-2 rounded-full mt-1 overflow-hidden">
-          <div className={`h-2 rounded-full bg-gradient-to-r ${barColor}`} style={{ width: prob }}></div>
+          <div
+            className={`h-2 rounded-full bg-gradient-to-r ${barColor}`}
+            style={{ width: prob }}
+          ></div>
         </div>
         <span className={`text-xs mt-1 ${riskColor}`}>{risk}</span>
       </div>
@@ -262,7 +243,9 @@ const PredictionCard = ({
       <div className="min-w-[100px] flex justify-end">
         <button
           onClick={onExecute}
-          className={`${buttonStyles[buttonColor] || "bg-cyan-500 hover:bg-cyan-600"} px-5 py-2 rounded-lg font-semibold transition`}
+          className={`${
+            buttonStyles[buttonColor] || "bg-cyan-500 hover:bg-cyan-600"
+          } px-5 py-2 rounded-lg font-semibold transition`}
         >
           Execute
         </button>

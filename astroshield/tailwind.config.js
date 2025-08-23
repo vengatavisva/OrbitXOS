@@ -8,7 +8,6 @@ export default {
     extend: {
       fontFamily: {
         orbitron: ["Orbitron", "sans-serif"],
-        rajdhani: ["Rajdhani", "sans-serif"],
       },
       colors: {
         primary: "#1D4ED8", // blue

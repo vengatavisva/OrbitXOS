@@ -52,24 +52,17 @@ export default function Dashboard() {
         <Navbar />
 
         <div className="p-6 pt-24">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-orbitron font-bold text-cyan-400">
-                Mission Control Dashboard
-              </h1>
-              <p className="text-gray-400 text-sm font-inter tracking-wide">
-                Real-time space debris monitoring and threat assessment
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button className="px-4 py-2 rounded-xl border border-gray-600 text-gray-200 hover:bg-gray-800/50 flex items-center gap-2 transition">
-                <Filter size={16} /> Filters
-              </button>
-              <button className="px-4 py-2 rounded-xl bg-cyan-400 text-black hover:bg-cyan-300 flex items-center gap-2 transition">
-                <RefreshCw size={16} /> Refresh
-              </button>
-            </div>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent">
+              Mission Control Dashboard
+            </h1>
+            <p className="text-gray-400 text-sm font-inter tracking-wide">
+              Real-time space debris monitoring and threat assessment
+            </p>
           </div>
+        </div>
+
 
           {/* Top Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

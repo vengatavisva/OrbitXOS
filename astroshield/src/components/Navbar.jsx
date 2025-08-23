@@ -16,22 +16,22 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="w-full fixed top-0 left-0 z-50 bg-[#141414]/95 backdrop-blur-lg border-b border-cyan-400/20">
+    <header className="w-full fixed top-0 left-0 z-50 bg-[#141414]/95 backdrop-blur-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <img
             src="/logo.png"
             alt="OrbitXOS Logo"
-            className="w-8 h-8 object-cover rounded-full drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]"
+            className="w-8 h-8 object-cover rounded-full"
           />
-          <h1 className="text-lg font-semibold text-cyan-300 tracking-wide drop-shadow-[0_0_12px_rgba(34,211,238,0.6)]">
+          <h1 className="text-lg font-semibold text-white tracking-wide">
             OrbitXOS
           </h1>
         </div>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center gap-6 text-cyan-300 font-medium">
+        <nav className="hidden md:flex items-center gap-6 text-white font-medium">
           {links.map((link) => (
             <NavLink
               key={link.name}
@@ -40,8 +40,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-200 text-sm ${
                   isActive
-                    ? "bg-cyan-900/40 text-cyan-400 border-b-2 border-cyan-400"
-                    : "hover:text-cyan-400"
+                    ? "text-white border-b-2 border-white"
+                    : "hover:text-gray-300"
                 }`
               }
             >
@@ -52,7 +52,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-cyan-400"
+          className="md:hidden text-white"
           onClick={() => setOpen(!open)}
           aria-label="Toggle Menu"
         >
@@ -62,7 +62,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden flex flex-col gap-3 bg-[#0d0d0d]/98 px-6 py-5 border-t border-cyan-400/20">
+        <div className="md:hidden flex flex-col gap-3 bg-[#0d0d0d]/98 px-6 py-5 border-t border-white/10">
           {links.map((link) => (
             <NavLink
               key={link.name}
@@ -72,8 +72,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
                   isActive
-                    ? "bg-cyan-900/40 text-cyan-400 border-b-2 border-cyan-400"
-                    : "hover:text-cyan-400"
+                    ? "text-white border-b-2 border-white"
+                    : "hover:text-gray-300"
                 }`
               }
             >

@@ -17,7 +17,7 @@ const TEXTURES = {
 
 export default function OrbitMapPro({
   height = 600,
-  debrisCount = 3000,
+  debrisCount = 5000,
   showNightLights = true,
   lockScrollOnHover = true,
 }) {
