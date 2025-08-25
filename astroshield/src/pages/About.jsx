@@ -24,7 +24,7 @@ const About = () => {
             className="max-w-5xl mx-auto text-center py-16 px-6 mt-24 bg-black/70 backdrop-blur-lg rounded-3xl shadow-[0_0_25px_rgba(0,255,255,0.3)]"
           >
             <h1 className="text-4xl md:text-5xl font-extrabold text-cyan-400 mb-6">
-              About AstroShield
+              About OrbitXOS
             </h1>
             <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
               Pioneering the future of space safety through advanced artificial intelligence
@@ -46,16 +46,16 @@ const About = () => {
               <span className="text-cyan-300 font-semibold">34,000 trackable objects</span> in orbit, the risk of catastrophic collisions threatens the future of space exploration and critical satellite infrastructure.
             </p>
             <p className="text-gray-300 leading-relaxed mt-4">
-              <span className="text-cyan-300 font-semibold">AstroShield</span> leverages cutting-edge machine learning algorithms to predict collision trajectories up to 7 days in advance, providing automated trajectory correction suggestions that have prevented{" "}
+              <span className="text-cyan-300 font-semibold">OrbitXOS</span> leverages cutting-edge machine learning algorithms to predict collision trajectories up to 7 days in advance, providing automated trajectory correction suggestions that have prevented{" "}
               <span className="text-cyan-300 font-semibold">847 potential collisions</span> to date.
             </p>
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center mt-8">
               {[
-                { value: "34,128", label: "Objects Tracked", color: "text-cyan-300" },
-                { value: "97.3%", label: "Prediction Accuracy", color: "text-green-400" },
-                { value: "847", label: "Collisions Prevented", color: "text-yellow-400" },
+                { value: "23,128", label: "Objects Tracked", color: "text-cyan-300" },
+                { value: "97.2%", label: "Prediction Accuracy", color: "text-green-400" },
+                { value: "420", label: "Collisions Prevented", color: "text-yellow-400" },
                 { value: "24/7", label: "Continuous Monitoring", color: "text-pink-400" },
               ].map((stat, idx) => (
                 <div

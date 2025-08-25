@@ -63,9 +63,9 @@ export default function App() {
 
           {/* Stats Section */}
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 px-6">
-            <StatCard value="34,128" label="Tracked Objects" />
-            <StatCard value="99.7%" label="Prediction Accuracy" />
-            <StatCard value="847" label="Collisions Prevented" />
+            <StatCard value="23,128" label="Tracked Objects" />
+            <StatCard value="97.2%" label="Prediction Accuracy" />
+            <StatCard value="420" label="Collisions Prevented" />
             <StatCard value="24/7" label="Active Monitoring" />
           </div>
         </section>
