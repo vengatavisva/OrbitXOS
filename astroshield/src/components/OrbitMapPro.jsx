@@ -216,13 +216,13 @@ export default function OrbitMapPro({
       for (let i = 0; i < samples; i++) {
         const t = new Date(epoch.getTime() + i * step * 1000);
         const pv = satellite.propagate(rec, t);
-        if (pv.position) {
+        if (pv && pv.position) {
           positions.push(
             pv.position.x * KM_TO_UNITS,
             pv.position.y * KM_TO_UNITS,
             pv.position.z * KM_TO_UNITS
           );
-        }
+        }        
       }
       const trailGeo = new THREE.BufferGeometry();
       trailGeo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -305,13 +305,16 @@ export default function OrbitMapPro({
       const now = new Date();
       sats.forEach((mesh) => {
         const pv = satellite.propagate(mesh.userData.rec, now);
-        if (pv.position) {
+        if (pv && pv.position) {
           mesh.position.set(
             pv.position.x * KM_TO_UNITS,
             pv.position.y * KM_TO_UNITS,
             pv.position.z * KM_TO_UNITS
           );
+        } else {
+          mesh.visible = false; // hide dead sats
         }
+
 
         // filters
         if (selectedSat && mesh.userData.name === selectedSat) {
