@@ -12,7 +12,7 @@ const TEXTURES = {
   earthDiffuse:
     "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg",
   earthNight:
-    "https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_4800.tif",
+    "https://raw.githubusercontent.com/vengatavisva/images/refs/heads/main/earth_lights_4800.jpg",
 };
 
 export default function OrbitMapPro({
