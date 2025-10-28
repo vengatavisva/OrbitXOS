@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Eye, Satellite, AlertTriangle, Activity, Globe } from "lucide-react";
 import Navbar from "../components/Navbar";
-import OrbitMapPro from "../components/OrbitMapPro"; 
+import OrbitMapPro from "../components/OrbitMapPro";
 import StarfieldBackground from "../components/StarfieldBackground";
 
 function StatCard({ value, label, change, color, Icon }) {
@@ -55,10 +55,69 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("https://orbitxos-dashboard.onrender.com/dashboard")
-      .then((res) => res.json())
-      .then((json) => setData(json))
-      .catch((err) => console.error("API fetch error:", err));
+    const staticData = {
+      stats: {
+        objects_tracked: 987,
+        objects_tracked_today: 124,
+        active_threats: 17,
+        active_threats_change: 2,
+        predictions_made: 432,
+        predictions_today: 14,
+        satellites_protected: 97,
+        satellites_protected_today: 2,
+      },
+      recent_alerts: [
+        {
+          message: "Critical debris detected near ISS orbit path.",
+          time: "2025-10-28T12:34:00Z",
+        },
+        {
+          message: "Satellite ORB-217 showing high velocity anomaly.",
+          time: "2025-10-28T10:15:00Z",
+        },
+        {
+          message: "New object entered LEO – classification pending.",
+          time: "2025-10-28T08:50:00Z",
+        },
+      ],
+      high_priority_tracking: [
+        {
+          object: "COSMOS-1408 Debris",
+          type: "Fragment",
+          altitude_km: 480,
+          velocity_kms: 7.82,
+          size: "Medium",
+          risk: "High",
+        },
+        {
+          object: "STARLINK-2319",
+          type: "Satellite",
+          altitude_km: 550,
+          velocity_kms: 7.68,
+          size: "Small",
+          risk: "Medium",
+        },
+        {
+          object: "ARIANE Upper Stage",
+          type: "Rocket Body",
+          altitude_km: 720,
+          velocity_kms: 7.45,
+          size: "Large",
+          risk: "Critical",
+        },
+        {
+          object: "UNKNOWN-LEO-021",
+          type: "Unknown",
+          altitude_km: 420,
+          velocity_kms: 7.85,
+          size: "Small",
+          risk: "Low",
+        },
+      ],
+    };
+
+    // simulate loading delay
+    setTimeout(() => setData(staticData), 800);
   }, []);
 
   if (!data) {
@@ -73,18 +132,14 @@ export default function Dashboard() {
       </div>
     );
   }
-  
 
   const { stats, recent_alerts, high_priority_tracking } = data;
-
-  // ✅ Only take maximum (latest) 5 alerts
   const maxAlerts = 3;
   const latestAlerts = recent_alerts.slice(0, maxAlerts);
 
   return (
     <div className="relative min-h-screen text-gray-200 overflow-hidden">
       <StarfieldBackground />
-
       <div className="relative z-10 min-h-screen">
         <Navbar />
 
@@ -100,35 +155,35 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Top Stats (Dynamic) */}
+          {/* Top Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <StatCard 
-              value={stats.objects_tracked} 
-              label="Objects Tracked" 
-              change={`+${stats.objects_tracked_today} today`} 
-              color="text-cyan-400" 
-              Icon={Satellite} 
+            <StatCard
+              value={stats.objects_tracked}
+              label="Objects Tracked"
+              change={`+${stats.objects_tracked_today} today`}
+              color="text-cyan-400"
+              Icon={Satellite}
             />
-            <StatCard 
-              value={stats.active_threats} 
-              label="Active Threats" 
-              change={`${stats.active_threats_change >= 0 ? "+" : ""}${stats.active_threats_change} today`} 
-              color="text-red-400" 
-              Icon={AlertTriangle} 
+            <StatCard
+              value={stats.active_threats}
+              label="Active Threats"
+              change={`${stats.active_threats_change >= 0 ? "+" : ""}${stats.active_threats_change} today`}
+              color="text-red-400"
+              Icon={AlertTriangle}
             />
-            <StatCard 
-              value={stats.predictions_made} 
-              label="Predictions Made" 
-              change={`+${stats.predictions_today} today`} 
-              color="text-purple-400" 
-              Icon={Activity} 
+            <StatCard
+              value={stats.predictions_made}
+              label="Predictions Made"
+              change={`+${stats.predictions_today} today`}
+              color="text-purple-400"
+              Icon={Activity}
             />
-            <StatCard 
-              value={stats.satellites_protected} 
-              label="Satellites Protected" 
-              change={`+${stats.satellites_protected_today} today`} 
-              color="text-blue-400" 
-              Icon={Globe} 
+            <StatCard
+              value={stats.satellites_protected}
+              label="Satellites Protected"
+              change={`+${stats.satellites_protected_today} today`}
+              color="text-blue-400"
+              Icon={Globe}
             />
           </div>
 
@@ -148,7 +203,7 @@ export default function Dashboard() {
 
             {/* System Status + Alerts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* System Status (Static for now) */}
+              {/* System Status */}
               <div className="bg-[#0d0d2d]/70 backdrop-blur-xl p-5 rounded-xl shadow-md border border-green-400/20">
                 <h2 className="text-xl font-orbitron font-bold text-green-400 mb-3">System Status</h2>
                 <ul className="space-y-2 text-sm font-inter text-gray-300">
@@ -166,7 +221,7 @@ export default function Dashboard() {
                 <p className="text-center text-gray-400 text-sm">System Uptime</p>
               </div>
 
-              {/* Recent Alerts (Dynamic - limited) */}
+              {/* Recent Alerts */}
               <div className="bg-[#0d0d2d]/70 backdrop-blur-xl p-5 rounded-xl shadow-md border border-red-400/20">
                 <h2 className="text-xl font-orbitron font-bold text-red-400 mb-3">Recent Alerts</h2>
                 <div className="space-y-3 text-sm">
@@ -183,7 +238,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* High-Priority Debris Tracking (Dynamic) */}
+          {/* High-Priority Debris Table */}
           <div className="bg-[#0d0d2d]/70 backdrop-blur-xl p-5 rounded-xl shadow-md border border-purple-400/20">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-xl font-orbitron font-bold text-purple-400">High-Priority Debris Tracking</h2>
@@ -204,7 +259,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {high_priority_tracking.map((item, idx) => (
-                  <ThreatRow 
+                  <ThreatRow
                     key={idx}
                     object={item.object}
                     type={item.type}
