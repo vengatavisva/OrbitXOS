@@ -6,6 +6,7 @@ import StarfieldBackground from "../components/StarfieldBackground";
 
 const Prediction = () => {
   const [events, setEvents] = useState([]);
+  const [countdowns, setCountdowns] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedSatellite, setSelectedSatellite] = useState(null);
 
@@ -18,6 +19,7 @@ const Prediction = () => {
         const data = await res.json();
         if (data.critical_events) {
           setEvents(data.critical_events);
+          initializeCountdowns(data.critical_events);
         }
       } catch (err) {
         console.error("Error fetching prediction data:", err);
@@ -27,6 +29,61 @@ const Prediction = () => {
     };
     fetchData();
   }, []);
+
+  const initializeCountdowns = (events) => {
+    const initial = {};
+    events.forEach((event, index) => {
+      let seconds = 0;
+      switch (event.risk_level) {
+        case "Critical":
+          seconds = getRandomSeconds(10 * 60, 50 * 60);
+          break;
+        case "High":
+          seconds = getRandomSeconds(50 * 60, 100 * 60);
+          break;
+        case "Medium":
+          seconds = getRandomSeconds(100 * 60, 200 * 60);
+          break;
+        case "Low":
+          seconds = getRandomSeconds(200 * 60, 250 * 60);
+          break;
+        default:
+          seconds = 2 * 3600;
+      }
+      initial[index] = seconds;
+    });
+    setCountdowns(initial);
+  };
+
+  const getRandomSeconds = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1)) + min;
+
+  useEffect(() => {
+    if (Object.keys(countdowns).length === 0) return;
+    const interval = setInterval(() => {
+      setCountdowns((prev) => {
+        const updated = {};
+        for (const key in prev) {
+          updated[key] = prev[key] > 0 ? prev[key] - 1 : 0;
+        }
+        return updated;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [countdowns]);
+
+  const formatSeconds = (totalSec) => {
+    const h = Math.floor(totalSec / 3600)
+      .toString()
+      .padStart(2, "0");
+    const m = Math.floor((totalSec % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = Math.floor(totalSec % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
 
   const buttonStyles = {
     Critical: "bg-red-500 hover:bg-red-600",
@@ -45,24 +102,23 @@ const Prediction = () => {
         <div className="max-w-7xl mx-auto px-6 py-12 pt-28 space-y-10">
           {/* Title */}
           <div>
-          <h1 className="text-4xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent drop-shadow-lg">
-            Collision Prediction Center
-          </h1>
-          <p className="text-gray-400 mt-2 text-lg font-inter tracking-wide">
-            AI-enhanced trajectory analysis and collision avoidance recommendations
-          </p>
-        </div>
-
+            <h1 className="text-4xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent drop-shadow-lg">
+              Collision Prediction Center
+            </h1>
+            <p className="text-gray-400 mt-2 text-lg font-inter tracking-wide">
+              AI-enhanced trajectory analysis and collision avoidance recommendations
+            </p>
+          </div>
 
           {/* Critical Alert */}
           {events.length > 0 && events[0].risk_level === "Critical" && (
-            <div className="bg-gradient-to-r from-red-900/40 via-red-800/20 to-transparent border border-red-500/40 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+            <div className="bg-transparent backdrop-blur-md border border-red-500/40 rounded-2xl p-5 flex items-center justify-between shadow-[0_0_30px_rgba(255,0,0,0.15)]">
               <p className="text-red-400 font-semibold text-lg">
                 ⚠ CRITICAL CONJUNCTION ALERT —{" "}
                 <span className="text-white">{events[0].satellite}</span>{" "}
                 requires immediate attention — maneuver window closing in{" "}
                 <span className="text-red-300">
-                  {events[0].time_to_impact}
+                  {formatSeconds(countdowns[0] || 0)}
                 </span>
               </p>
               <button
@@ -88,9 +144,7 @@ const Prediction = () => {
             {loading ? (
               <p className="text-gray-400">Loading predictions...</p>
             ) : events.length === 0 ? (
-              <p className="text-gray-400">
-                No critical events at this time 🚀
-              </p>
+              <p className="text-gray-400">No critical events at this time 🚀</p>
             ) : (
               <div className="space-y-6">
                 {events.map((event, i) => {
@@ -105,7 +159,6 @@ const Prediction = () => {
                     burnText = maneuverText;
                   }
 
-                  // Fallback TLE if missing
                   const satelliteTLE =
                     event.satellite_tle || "No TLE data available";
                   const debrisTLE = event.debris_tle || "No TLE data available";
@@ -115,7 +168,7 @@ const Prediction = () => {
                       key={i}
                       title={event.satellite}
                       target={event.debris}
-                      time={event.time_to_impact}
+                      time={formatSeconds(countdowns[i] || 0)}
                       prob={event.probability}
                       probColor={
                         event.risk_level === "Critical"
@@ -159,7 +212,7 @@ const Prediction = () => {
                             debris: event.debris,
                             debrisTLE,
                             risk: event.risk_level,
-                            time: event.time_to_impact,
+                            time: formatSeconds(countdowns[i] || 0),
                           },
                         })
                       }
@@ -169,14 +222,13 @@ const Prediction = () => {
               </div>
             )}
           </section>
-
-         </div>
+        </div>
       </div>
     </div>
   );
 };
 
-// Prediction Card Component
+// 🔹 Prediction Card Component
 const PredictionCard = ({
   title,
   target,
@@ -196,11 +248,11 @@ const PredictionCard = ({
 }) => {
   return (
     <div
-      className={`bg-[#0d0d2a]/80 backdrop-blur-md rounded-xl px-6 py-5 border shadow-md transition flex items-center justify-between space-x-6
+      className={`bg-transparent backdrop-blur-md rounded-xl px-6 py-5 border transition flex items-center justify-between space-x-6
       ${
         isHighlighted
-          ? "border-2 border-cyan-400 shadow-cyan-400/50 animate-pulse"
-          : "border-cyan-500/20 hover:shadow-cyan-500/10"
+          ? "border-2 border-cyan-400 shadow-[0_0_35px_rgba(0,255,255,0.4)] animate-pulse"
+          : "border-white/10 hover:border-cyan-400/30 hover:shadow-[0_0_25px_rgba(0,255,255,0.2)]"
       }`}
     >
       {/* Left: Satellite & Target */}
@@ -218,7 +270,7 @@ const PredictionCard = ({
       {/* Probability + Risk */}
       <div className="flex flex-col items-center min-w-[150px]">
         <span className={`text-2xl font-bold ${probColor}`}>{prob}</span>
-        <div className="w-28 bg-gray-800 h-2 rounded-full mt-1 overflow-hidden">
+        <div className="w-28 bg-white/10 h-2 rounded-full mt-1 overflow-hidden">
           <div
             className={`h-2 rounded-full bg-gradient-to-r ${barColor}`}
             style={{ width: prob }}
@@ -230,7 +282,7 @@ const PredictionCard = ({
       {/* Maneuver Suggestion */}
       <div className="text-center min-w-[180px]">
         <p className="text-cyan-300 text-sm">⏳ {burn}</p>
-        <span className="text-gray-400 text-xs">maneuver suggestion</span>
+        <span className="text-gray-400 text-xs">Maneuver Suggestion</span>
       </div>
 
       {/* Confidence */}

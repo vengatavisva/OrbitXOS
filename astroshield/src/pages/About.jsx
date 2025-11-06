@@ -70,7 +70,7 @@ const About = () => {
           </motion.div>
 
           {/* AI Pipeline Section */}
-          <motion.div
+         /* <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
@@ -117,62 +117,6 @@ const About = () => {
             </div>
           </motion.div>
 
-          {/* Team Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="max-w-6xl mx-auto mt-16 text-center"
-          >
-            <h2 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent drop-shadow-lg mb-10">
-              Meet Our Team
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {[
-                {
-                  name: "Sudharsan S",
-                  role: "Machine Learning Engineer",
-                  skills: "Predictive Modeling, TLE Data Analysis",
-                  image: "src/assets/sudh.JPG",
-                },
-                {
-                  name: "Vengata Visva S",
-                  role: "Full-Stack Developer",
-                  skills: "API Development, Backend Integration",
-                  image: "src/assets/vis.JPG",
-                },
-                {
-                  name: "Rohith B",
-                  role: "Full-Stack Developer",
-                  skills: "RESTfull Services, System Architecture",
-                  image: "src/assets/roh.JPG",
-                },
-                {
-                  name: "Jayanth K",
-                  role: "Backend Developer",
-                  skills: "Server Side Programming, Optimization",
-                  image: "src/assets/jayan.jpg",
-                },
-              ].map((member, idx) => (
-                <div
-                  key={idx}
-                  className="bg-black/60 backdrop-blur-lg border border-cyan-500/30 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,255,255,0.2)] hover:scale-105 hover:shadow-[0_0_25px_rgba(0,255,255,0.6)] transition"
-                >
-                  {/* Profile Image */}
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-cyan-400 shadow-lg mb-4"
-                  />
-
-                  <h3 className="text-lg font-bold text-cyan-300">{member.name}</h3>
-                  <p className="text-gray-400">{member.role}</p>
-                  <p className="text-gray-500 text-sm mt-2">{member.skills}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
 
         </div>
       </div>

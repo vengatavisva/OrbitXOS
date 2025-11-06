@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { FiMenu, FiX, FiHome, FiInfo } from "react-icons/fi";
 import { SiTensorflow } from "react-icons/si";
 import { Radar, AlertTriangle } from "lucide-react";
@@ -16,33 +16,39 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="w-full fixed top-0 left-0 z-50 bg-[#141414]/95 backdrop-blur-lg border-b border-white/10">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
+    <header
+      className="fixed top-4 left-1/2 transform -translate-x-1/2 w-[94%] 
+                 z-50 bg-white/10 backdrop-blur-lg border border-white/20 
+                 shadow-[0_0_20px_rgba(255,255,255,0.08)] 
+                 rounded-2xl py-3 px-6 transition-all duration-300"
+    >
+      <div className="flex items-center justify-between">
+        {/* Logo + Title */}
+        <Link to="/" className="flex items-center gap-2">
           <img
             src="/logo.png"
             alt="OrbitXOS Logo"
             className="w-8 h-8 object-cover rounded-full"
           />
-          <h1 className="text-lg font-semibold text-white tracking-wide">
+          <h1 className="font-orbitron text-lg font-semibold text-white tracking-wide">
             OrbitXOS
           </h1>
-        </div>
+        </Link>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center gap-6 text-white font-medium">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
           {links.map((link) => (
             <NavLink
               key={link.name}
               to={link.path}
-              end={link.path === "/"} // exact match only for Home
+              end={link.path === "/"}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-200 text-sm ${
-                  isActive
-                    ? "text-white border-b-2 border-white"
-                    : "hover:text-gray-300"
-                }`
+                `relative flex items-center gap-2 transition-all duration-200 
+                 ${
+                   isActive
+                     ? "text-white after:absolute after:left-0 after:bottom-[-4px] after:h-[2px] after:w-full after:bg-white"
+                     : "text-gray-300 hover:text-white hover:after:absolute hover:after:left-0 hover:after:bottom-[-4px] hover:after:h-[2px] hover:after:w-full hover:after:bg-gray-400"
+                 }`
               }
             >
               {link.icon} {link.name}
@@ -60,9 +66,10 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Dropdown Menu */}
       {open && (
-        <div className="md:hidden flex flex-col gap-3 bg-[#0d0d0d]/98 px-6 py-5 border-t border-white/10">
+        <div className="md:hidden mt-3 flex flex-col gap-3 bg-black/40 backdrop-blur-md 
+                        border border-white/10 rounded-xl px-5 py-4 shadow-lg">
           {links.map((link) => (
             <NavLink
               key={link.name}
@@ -70,11 +77,12 @@ export default function Navbar() {
               end={link.path === "/"}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
-                  isActive
-                    ? "text-white border-b-2 border-white"
-                    : "hover:text-gray-300"
-                }`
+                `flex items-center gap-2 text-sm py-2 px-2 rounded-lg transition-all 
+                 ${
+                   isActive
+                     ? "text-white border-b border-white"
+                     : "text-gray-300 hover:text-white hover:border-b hover:border-gray-400"
+                 }`
               }
             >
               {link.icon} {link.name}

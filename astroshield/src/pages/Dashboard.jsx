@@ -7,8 +7,8 @@ import StarfieldBackground from "../components/StarfieldBackground";
 function StatCard({ value, label, change, color, Icon }) {
   return (
     <div className="p-6 rounded-xl shadow-lg text-center 
-                    bg-[#0d0d2d]/70 backdrop-blur-xl 
-                    border border-gray-700/50 
+                    bg-transparent backdrop-blur-md 
+                    border border-white/10 
                     hover:scale-105 transition-transform duration-300">
       <div className="flex items-center justify-center gap-2">
         <p className={`font-orbitron text-4xl font-bold ${color}`}>
@@ -26,11 +26,11 @@ function StatCard({ value, label, change, color, Icon }) {
 
 function ThreatRow({ object, type, alt, velocity, size, risk }) {
   const riskColors = {
-    Critical: { bg: "bg-red-700/50", text: "text-red-200" },
-    High: { bg: "bg-red-900/40", text: "text-red-300" },
-    Medium: { bg: "bg-yellow-900/40", text: "text-yellow-300" },
-    Low: { bg: "bg-green-900/40", text: "text-green-300" },
-    Unknown: { bg: "bg-gray-800/40", text: "text-gray-300" },
+    Critical: { bg: "bg-red-700/30", text: "text-red-200" },
+    High: { bg: "bg-red-900/20", text: "text-red-300" },
+    Medium: { bg: "bg-yellow-900/20", text: "text-yellow-300" },
+    Low: { bg: "bg-green-900/20", text: "text-green-300" },
+    Unknown: { bg: "bg-gray-800/20", text: "text-gray-300" },
   };
 
   const riskColor = riskColors[risk] || riskColors.Unknown;
@@ -161,35 +161,35 @@ export default function Dashboard() {
               value={stats.objects_tracked}
               label="Objects Tracked"
               change={`+${stats.objects_tracked_today} today`}
-              color="text-cyan-400"
+              color="text-white"
               Icon={Satellite}
             />
             <StatCard
               value={stats.active_threats}
               label="Active Threats"
               change={`${stats.active_threats_change >= 0 ? "+" : ""}${stats.active_threats_change} today`}
-              color="text-red-400"
+              color="text-white"
               Icon={AlertTriangle}
             />
             <StatCard
               value={stats.predictions_made}
               label="Predictions Made"
               change={`+${stats.predictions_today} today`}
-              color="text-purple-400"
+              color="text-white"
               Icon={Activity}
             />
             <StatCard
               value={stats.satellites_protected}
               label="Satellites Protected"
               change={`+${stats.satellites_protected_today} today`}
-              color="text-blue-400"
+              color="text-white"
               Icon={Globe}
             />
           </div>
 
           {/* Orbital Map */}
           <div className="space-y-6 mb-8">
-            <div className="relative bg-[#0d0d2d]/80 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-gray-600/40">
+            <div className="relative bg-gradient-to-b from-black/20 via-black/10 to-transparent backdrop-blur-md p-5 rounded-2xl shadow-lg border border-white/10">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-orbitron font-bold text-gray-200 tracking-wide">
                   Real-Time Orbital Map
@@ -204,29 +204,29 @@ export default function Dashboard() {
             {/* System Status + Alerts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* System Status */}
-              <div className="bg-[#0d0d2d]/70 backdrop-blur-xl p-5 rounded-xl shadow-md border border-green-400/20">
-                <h2 className="text-xl font-orbitron font-bold text-green-400 mb-3">System Status</h2>
+              <div className="bg-transparent backdrop-blur-md p-5 rounded-xl shadow-md border border-white/10">
+                <h2 className="text-xl font-orbitron font-bold text-white mb-3">System Status</h2>
                 <ul className="space-y-2 text-sm font-inter text-gray-300">
                   <li className="flex justify-between">
-                    <span>Tracking Network</span> <span className="text-green-400">● OPERATIONAL</span>
+                    <span>Tracking Network</span> <span className="text-white">● OPERATIONAL</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>AI Prediction Engine</span> <span className="text-purple-400">● ACTIVE</span>
+                    <span>AI Prediction Engine</span> <span className="text-white">● ACTIVE</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>Data Processing</span> <span className="text-yellow-400">● PROCESSING</span>
+                    <span>Data Processing</span> <span className="text-white">● PROCESSING</span>
                   </li>
                 </ul>
-                <p className="mt-4 text-center text-2xl font-orbitron font-bold text-green-400">99.7%</p>
+                <p className="mt-4 text-center text-2xl font-orbitron font-bold text-white">99.7%</p>
                 <p className="text-center text-gray-400 text-sm">System Uptime</p>
               </div>
 
               {/* Recent Alerts */}
-              <div className="bg-[#0d0d2d]/70 backdrop-blur-xl p-5 rounded-xl shadow-md border border-red-400/20">
-                <h2 className="text-xl font-orbitron font-bold text-red-400 mb-3">Recent Alerts</h2>
+              <div className="bg-transparent backdrop-blur-md p-5 rounded-xl shadow-md border border-white/10">
+                <h2 className="text-xl font-orbitron font-bold text-white mb-3">Recent Alerts</h2>
                 <div className="space-y-3 text-sm">
                   {latestAlerts.map((alert, idx) => (
-                    <div key={idx} className="p-3 rounded-md bg-red-900/30 border border-red-700">
+                    <div key={idx} className="p-3 rounded-md bg-red-900/20 border border-red-500/30">
                       ⚠️ {alert.message}
                       <span className="block text-xs text-gray-400">
                         {new Date(alert.time).toLocaleString()}
@@ -239,16 +239,16 @@ export default function Dashboard() {
           </div>
 
           {/* High-Priority Debris Table */}
-          <div className="bg-[#0d0d2d]/70 backdrop-blur-xl p-5 rounded-xl shadow-md border border-purple-400/20">
+          <div className="bg-transparent backdrop-blur-md p-5 rounded-xl shadow-md border border-white/10">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-orbitron font-bold text-purple-400">High-Priority Debris Tracking</h2>
-              <button className="px-4 py-1 rounded-lg border border-purple-500 text-purple-300 text-sm flex items-center gap-1 hover:bg-purple-900/40 transition">
+              <h2 className="text-xl font-orbitron font-bold text-white">High-Priority Debris Tracking</h2>
+              <button className="px-4 py-1 rounded-lg border border-purple-500 text-white text-sm flex items-center gap-1 hover:bg-purple-900/40 transition">
                 <Eye size={14} /> View All
               </button>
             </div>
             <table className="w-full text-sm font-inter">
               <thead>
-                <tr className="text-purple-300 text-left border-b border-purple-800">
+                <tr className="text-white text-left border-b border-purple-800">
                   <th className="py-2">Object Name</th>
                   <th>Type</th>
                   <th>Altitude</th>

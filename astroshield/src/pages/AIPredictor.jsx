@@ -12,8 +12,7 @@ const EARTH_RADIUS_KM = 6371;
 const EARTH_RADIUS_UNITS = 1.0;
 const KM_TO_UNITS = EARTH_RADIUS_UNITS / EARTH_RADIUS_KM;
 const SCALE_FACTOR = 25;
-
-const COLLISION_DISTANCE = 0.3; // units for collision detection
+const COLLISION_DISTANCE = 0.3;
 
 const TEXTURES = {
   earthDiffuse: "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg",
@@ -51,14 +50,11 @@ export default function AIPredictor() {
       });
 
       const data = await res.json();
-      console.log("🚀 API DATA:", data);
-
       setTleData({
         satellite: data.tle_output?.satellite_tle,
         debris: data.tle_output?.debris_tle,
         predicted_safe: data.tle_output?.predicted_safe_tle,
       });
-
       setRisk(data.risk || {});
       setManeuver(data.maneuver || {});
 
@@ -91,15 +87,12 @@ export default function AIPredictor() {
     const container = mountRef.current;
     if (!container) return;
 
-    if (container.hasChildNodes()) {
-      container.innerHTML = "";
-    }
+    if (container.hasChildNodes()) container.innerHTML = "";
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
     const loader = new THREE.TextureLoader();
-
     const camera = new THREE.PerspectiveCamera(
       45,
       container.clientWidth / container.clientHeight,
@@ -152,25 +145,20 @@ export default function AIPredictor() {
     starGeo.setAttribute("position", new THREE.Float32BufferAttribute(starPositions, 3));
     scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 })));
 
-    // Parse TLEs
     const satRec = parseTLE(tleData.satellite);
     const debrisRec = parseTLE(tleData.debris);
     const safeRec = parseTLE(tleData.predicted_safe);
 
-    // Satellite + Debris
     const satMesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.2, 16, 16),
       new THREE.MeshBasicMaterial({ color: 0x00ff00 })
     );
-    scene.add(satMesh);
-
     const debrisMesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.2, 16, 16),
       new THREE.MeshBasicMaterial({ color: 0xff0000 })
     );
-    scene.add(debrisMesh);
+    scene.add(satMesh, debrisMesh);
 
-    // Collision marker (red X / sphere)
     const collisionMarker = new THREE.Mesh(
       new THREE.SphereGeometry(0.4, 32, 32),
       new THREE.MeshBasicMaterial({ color: 0xff0000 })
@@ -178,8 +166,7 @@ export default function AIPredictor() {
     collisionMarker.visible = false;
     scene.add(collisionMarker);
 
-    // Compute orbit helper
-    function computeOrbit(rec) {
+    const computeOrbit = (rec) => {
       if (!rec) return [];
       const positions = [];
       const samples = 400;
@@ -201,73 +188,60 @@ export default function AIPredictor() {
         }
       }
       return positions;
-    }
+    };
 
-    let satOrbit = computeOrbit(satRec);
+    const satOrbit = computeOrbit(satRec);
     const debrisOrbit = computeOrbit(debrisRec);
     const safeOrbit = computeOrbit(safeRec);
 
-    function makeTrail(points, color) {
+    const makeTrail = (points, color) => {
       if (points.length === 0) return null;
       const geo = new THREE.BufferGeometry().setFromPoints(points);
       return new THREE.Line(
         geo,
         new THREE.LineBasicMaterial({ color, linewidth: 2, transparent: true, opacity: 0.6 })
       );
-    }
+    };
 
     let satTrail = makeTrail(satOrbit, 0x00ff00);
     const debrisTrail = makeTrail(debrisOrbit, 0xff0000);
     if (satTrail) scene.add(satTrail);
     if (debrisTrail) scene.add(debrisTrail);
 
-    // Transition state
     let transitioning = false;
     let transitionProgress = 0;
-
-    function transitionToNewOrbit() {
+    const transitionToNewOrbit = () => {
       if (!safeOrbit.length) return;
       transitioning = true;
       transitionProgress = 0;
       if (satTrail) scene.remove(satTrail);
-    }
+    };
 
-    // Animate
     let frame = 0;
     function animate() {
       requestAnimationFrame(animate);
 
       if (!transitioning) {
-        if (satOrbit.length > 0) {
-          satMesh.position.copy(satOrbit[Math.floor(frame) % satOrbit.length]);
-        }
+        if (satOrbit.length > 0) satMesh.position.copy(satOrbit[Math.floor(frame) % satOrbit.length]);
       } else {
         transitionProgress += 0.005;
         if (transitionProgress >= 1) {
           transitioning = false;
-          satOrbit = safeOrbit;
-          satTrail = makeTrail(satOrbit, 0x00ff00);
+          satTrail = makeTrail(safeOrbit, 0x00ff00);
           if (satTrail) scene.add(satTrail);
         } else {
           const i = Math.floor(frame) % Math.min(satOrbit.length, safeOrbit.length);
-          const current = satOrbit[i];
-          const target = safeOrbit[i];
-          satMesh.position.lerpVectors(current, target, transitionProgress);
+          satMesh.position.lerpVectors(satOrbit[i], safeOrbit[i], transitionProgress);
         }
       }
 
-      if (debrisOrbit.length > 0) {
-        debrisMesh.position.copy(debrisOrbit[Math.floor(frame) % debrisOrbit.length]);
-      }
+      if (debrisOrbit.length > 0) debrisMesh.position.copy(debrisOrbit[Math.floor(frame) % debrisOrbit.length]);
 
-      // Collision detection
-      if (!collisionMarker.visible) {
-        const distance = satMesh.position.distanceTo(debrisMesh.position);
-        if (distance < COLLISION_DISTANCE) {
-          collisionMarker.visible = true;
-          collisionMarker.position.copy(satMesh.position);
-          setTimeout(() => transitionToNewOrbit(), 2000);
-        }
+      const distance = satMesh.position.distanceTo(debrisMesh.position);
+      if (!collisionMarker.visible && distance < COLLISION_DISTANCE) {
+        collisionMarker.visible = true;
+        collisionMarker.position.copy(satMesh.position);
+        setTimeout(() => transitionToNewOrbit(), 2000);
       }
 
       frame += 0.3;
@@ -277,7 +251,6 @@ export default function AIPredictor() {
     }
     animate();
 
-    // Resize
     const onResize = () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
@@ -291,11 +264,9 @@ export default function AIPredictor() {
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) {
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach((m) => m.dispose());
-          } else {
-            obj.material.dispose();
-          }
+          Array.isArray(obj.material)
+            ? obj.material.forEach((m) => m.dispose())
+            : obj.material.dispose();
         }
       });
       renderer.dispose();
@@ -310,11 +281,14 @@ export default function AIPredictor() {
       <StarfieldBackground />
       <div className="relative z-10">
         <Navbar />
+
         <section className="max-w-6xl mx-auto px-6 py-20 space-y-10">
           {!showResults && (
-            <motion.div className="bg-[#0E0A2A]/80 p-8 rounded-3xl border border-gray-700 shadow-2xl">
-              <h2 className="text-2xl font-semibold mb-4 text-cyan-400">Satellite & Debris TLE Data</h2>
-              <div className="bg-black text-green-400 font-mono p-6 rounded-xl whitespace-pre-line text-lg">
+            <motion.div className="bg-transparent backdrop-blur-md p-8 rounded-3xl border border-white/10 shadow-[0_0_25px_rgba(0,255,255,0.15)]">
+              <h2 className="text-2xl font-semibold mb-4 text-cyan-400">
+                Satellite & Debris TLE Data
+              </h2>
+              <div className="bg-black/40 text-green-400 font-mono p-6 rounded-xl whitespace-pre-line text-lg border border-white/10">
                 SATELLITE: {passedState.satellite}
                 {"\n"}
                 {passedState.satelliteTLE}
@@ -324,7 +298,7 @@ export default function AIPredictor() {
               </div>
               <motion.button
                 onClick={handleAnalyze}
-                className="mt-6 px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 font-semibold"
+                className="mt-6 px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-lg hover:scale-105 transition font-semibold shadow-[0_0_20px_rgba(0,255,255,0.3)]"
               >
                 {analyzing ? "Analyzing..." : "Analyze Trajectory"}
               </motion.button>
@@ -333,15 +307,19 @@ export default function AIPredictor() {
 
           {analyzing && (
             <div className="flex flex-col items-center justify-center h-64">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-4 text-lg text-gray-300 animate-pulse">Processing trajectory...</p>
+              <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-4 text-lg text-gray-300 animate-pulse">
+                Processing trajectory...
+              </p>
             </div>
           )}
 
           {showResults && tleData && (
             <div className="space-y-8">
-              <h2 className="text-3xl font-bold text-center text-white-400">Orbit Simulator</h2>
-              <div className="relative bg-[#05031a]/90 rounded-2xl p-3 border-2 border-cyan-500 shadow-[0_0_20px_#00faff]">
+              <h2 className="text-3xl font-bold text-center text-white">
+                Orbit Simulator
+              </h2>
+              <div className="relative bg-transparent backdrop-blur-md rounded-2xl p-3 border border-white/10 shadow-[0_0_25px_rgba(0,255,255,0.15)]">
                 <div ref={mountRef} className="w-full h-[550px] rounded-xl overflow-hidden" />
               </div>
 
@@ -355,7 +333,7 @@ export default function AIPredictor() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-[#0B0824]/95 p-8 rounded-2xl border border-gray-700 shadow-xl">
+                <div className="bg-transparent backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(0,255,255,0.1)]">
                   <h3 className="text-2xl font-bold text-cyan-400 flex items-center gap-2 mb-6">
                     <span className="w-3 h-3 rounded-full bg-cyan-400"></span>
                     Risk Analysis
@@ -364,29 +342,37 @@ export default function AIPredictor() {
                     <div className="flex justify-between">
                       <span className="text-gray-300">Minimum Distance:</span>
                       <span className="text-red-400 font-semibold">
-                        {risk?.min_distance_km ? `${risk.min_distance_km.toFixed(2)} km` : "N/A"}
+                        {risk?.min_distance_km
+                          ? `${risk.min_distance_km.toFixed(2)} km`
+                          : "N/A"}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Time of Closest Approach:</span>
+                      <span className="text-gray-300">
+                        Time of Closest Approach:
+                      </span>
                       <span className="text-white font-mono">{risk?.tca ?? "N/A"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Orbit Regime:</span>
-                      <span className="text-yellow-400 font-semibold">{risk?.regime ?? "N/A"}</span>
+                      <span className="text-yellow-400 font-semibold">
+                        {risk?.regime ?? "N/A"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Risk Threshold:</span>
-                      <span className="text-white">{risk?.threshold_km ? `${risk.threshold_km} km` : "N/A"}</span>
+                      <span className="text-white">
+                        {risk?.threshold_km ? `${risk.threshold_km} km` : "N/A"}
+                      </span>
                     </div>
-                    <hr className="border-gray-700 my-4" />
+                    <hr className="border-white/10 my-4" />
                     <div className="flex justify-between items-center">
                       <span className="text-gray-300">Risk Status:</span>
                       <span
                         className={`px-4 py-1 rounded-lg font-bold text-sm ${
                           risk?.risky
-                            ? "bg-red-700/70 text-red-300"
-                            : "bg-green-700/70 text-green-300"
+                            ? "bg-red-800/40 text-red-300 border border-red-500/40"
+                            : "bg-green-800/40 text-green-300 border border-green-500/40"
                         }`}
                       >
                         {risk?.risky ? "RISKY" : "SAFE"}
@@ -395,7 +381,7 @@ export default function AIPredictor() {
                   </div>
                 </div>
 
-                <div className="bg-[#0B0824]/95 p-8 rounded-2xl border border-gray-700 shadow-xl">
+                <div className="bg-transparent backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,0,255,0.1)]">
                   <h3 className="text-2xl font-bold text-purple-400 flex items-center gap-2 mb-6">
                     <span className="w-3 h-3 rounded-full bg-purple-400"></span>
                     Maneuver Suggestion
@@ -403,21 +389,24 @@ export default function AIPredictor() {
                   <div className="space-y-3 text-lg">
                     <div className="flex justify-between">
                       <span className="text-gray-300">Action Type:</span>
-                      <span className="text-yellow-400 font-semibold">{maneuver?.type ?? "N/A"}</span>
+                      <span className="text-yellow-400 font-semibold">
+                        {maneuver?.type ?? "N/A"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Recommended ΔV:</span>
                       <span className="text-blue-400 font-semibold">
-                        {maneuver?.recommended_dv_mps ? `${maneuver.recommended_dv_mps} m/s` : "N/A"}
+                        {maneuver?.recommended_dv_mps
+                          ? `${maneuver.recommended_dv_mps} m/s`
+                          : "N/A"}
                       </span>
                     </div>
-                    <div className="bg-black/40 text-gray-200 italic p-4 rounded-xl mt-4 border border-gray-700">
+                    <div className="bg-black/40 text-gray-200 italic p-4 rounded-xl mt-4 border border-white/10">
                       {maneuver?.note ?? "No maneuver needed."}
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
           )}
         </section>
